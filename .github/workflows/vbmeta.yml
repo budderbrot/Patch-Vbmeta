@@ -1,0 +1,41 @@
+name: VBMETA
+
+on:
+  workflow_dispatch:
+    inputs:
+      VBMETA_URL:
+        description: 'VBMETA URL'
+        required: true
+        default: 'https://transfer.sh/(RECOMMENDED)'
+
+env:
+  VBMETA_URL: https://oshi.at/Rpjg
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check Out
+      uses: actions/checkout@main
+
+    - name: Prepare the environment
+      run: |
+        sudo apt install git wget lz4 tar openssl python3 -y
+
+    - name: Fetch image from URL
+      run: |
+        ls
+        pwd
+        wget ${{github.event.inputs.VBMETA_URL }}
+
+    - name: Patch Process
+      run: |
+        chmod a+x script1.sh
+        ./script1.sh || true
+
+    - name: Upload Recovery
+      uses: actions/upload-artifact@v3.0.0
+      with:
+        path: /home/runner/work/Patch-Vbmeta/Patch-Vbmeta/output/*.tar
+        name: Patched-Vbmeta

@@ -1,12 +1,18 @@
 #!/bin/bash
 
-if [ -f recovery.img.lz4 ];then
-	lz4 -B6 --content-size -f recovery.img.lz4 recovery.img
-fi
+# based on https://github.com/BlackMesa123/proprietary_vendor_samsung_a52sxq/blob/main/.github/workflows/check.yml#L137
 
-off=$(grep -ab -o SEANDROIDENFORCE recovery.img |tail -n 1 |cut -d : -f 1)
-dd if=recovery.img of=r.img bs=4k count=$off iflag=count_bytes
+# extract vbmeta.img
+lz4 -d vbmeta.img.lz4 vbmeta.img
 
-if [ ! -f phh.pem ];then
-    openssl genrsa -f4 -out phh.pem 4096
-fi
+# remove old lz4 file
+rm vbmeta.img.lz4
+
+# create empty vbmeta
+printf "$(printf '\\x%02X' 3)" | dd of="vbmeta.img" bs=1 seek=123 count=1 conv=notrunc &> /dev/null
+
+# pack to tar
+tar cvf patched_vbmeta.tar vbmeta.img
+
+# remove vbmeta.img
+rm vbmeta.img
